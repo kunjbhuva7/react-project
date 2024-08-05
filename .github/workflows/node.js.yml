@@ -33,7 +33,7 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
         ssh -v -o StrictHostKeyChecking=no -i kk.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd /home/kunj/testdir
+          cd /home/ubuntu/kunj/testdir
           npm ci
           exit
         EOF

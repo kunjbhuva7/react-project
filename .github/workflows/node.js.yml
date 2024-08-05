@@ -32,17 +32,7 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        scp -v -o StrictHostKeyChecking=no -i kk.pem -r . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/kunj/testdir
         ssh -v -o StrictHostKeyChecking=no -i kk.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          sudo apt-get update
-          sudo apt-get install -y nginx
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          sudo npm install -g pm2
-          pm2 --version
-          sudo systemctl start nginx
-          sudo systemctl enable nginx
           cd /home/ubuntu/kunj/testdir
-          npm ci
-          npm run build --if-present
+          exit
         EOF

@@ -33,4 +33,10 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
         scp -v -o StrictHostKeyChecking=no -i kk.pem -r . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/kunj/testdir
-        ssh -v -o StrictHostKeyChecking=no -i kk.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'mkdir -p /home/kunj/testdir && cd /home/kunj/testdir && npm ci && npm run build --if-present'
+        ssh -v -o StrictHostKeyChecking=no -i kk.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd /home/kunj/testdir
+          npm ci
+          npm run build --if-present
+          cp -r /home/kunj/testdir/build/* /var/www/html/
+          exit
+        EOF

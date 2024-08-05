@@ -6,13 +6,11 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v3
@@ -23,16 +21,19 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
+    - name: Print Base64 Encoded SSH Key
+      run: echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode | tee kunj_ssh_key
+    - name: Decode and Save SSH Key
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > kunj_ssh_key
+        chmod 600 kunj_ssh_key
+        echo "SSH key length:"
+        wc -c < kunj_ssh_key
     - name: Deploy to EC2
       env:
         EC2_HOST: 3.91.58.141
         EC2_USER: app
-        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > kunj_ssh_key
-        chmod 600 kunj_ssh_key
-        echo "SSH key content:"
-        cat kunj_ssh_key
         scp -o StrictHostKeyChecking=no -i kunj_ssh_key -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
         ssh -o StrictHostKeyChecking=no -i kunj_ssh_key $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
         rm kunj_ssh_key

@@ -32,7 +32,7 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        scp -o StrictHostKeyChecking=no -i kk.pem -r . "$EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app"
-        ssh -o StrictHostKeyChecking=no -i kk.pem "$EC2_USER@$EC2_HOST" 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
+        scp -o StrictHostKeyChecking=no -i kk.pem -r . ec2-3-91-58-141.compute-1.amazonaws.com:/home/kunj/my-nodejs-app"
+        ssh -o StrictHostKeyChecking=no -i kk.pem ec2-3-91-58-141.compute-1.amazonaws.com 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
         rm kk.pem
 

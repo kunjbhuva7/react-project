@@ -31,8 +31,8 @@ jobs:
         wc -c < kunj_ssh_key
     - name: Deploy to EC2
       env:
-        EC2_HOST: 3.91.58.141
-        EC2_USER: app
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
       run: |
         scp -o StrictHostKeyChecking=no -i kunj_ssh_key -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
         ssh -o StrictHostKeyChecking=no -i kunj_ssh_key $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'

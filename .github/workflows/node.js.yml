@@ -25,15 +25,15 @@ jobs:
       run: echo "${{ secrets.EC2_SSH_KEY }}"
     - name: Decode and Save SSH Key
       run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > kunj_ssh_key || { echo "Failed to decode base64"; exit 1; }
-        chmod 600 kunj_ssh_key
+        echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > kk.pem || { echo "Failed to decode base64"; exit 1; }
+        chmod 400 kk.pem
         echo "SSH key length:"
-        wc -c < kunj_ssh_key
+        wc -c < kk.pem
     - name: Deploy to EC2
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        scp -o StrictHostKeyChecking=no -i kunj_ssh_key -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
-        ssh -o StrictHostKeyChecking=no -i kunj_ssh_key $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
-        rm kunj_ssh_key
+        scp -o StrictHostKeyChecking=no -i kk.pem -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
+        ssh -o StrictHostKeyChecking=no -i kk.pem $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
+        rm kk.pem

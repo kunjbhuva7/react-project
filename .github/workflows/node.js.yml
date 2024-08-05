@@ -29,8 +29,9 @@ jobs:
         EC2_USER: app
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" > ssh_key
-        chmod 600 ssh_key
+        echo "${{ secrets.EC2_SSH_KEY }}" > | base64 -d > kk.pem
+        chmod 600 kk.pem
+        cat kk.pem
         scp -o StrictHostKeyChecking=no -i ssh_key -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
         ssh -o StrictHostKeyChecking=no -i ssh_key $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
         rm ssh_key

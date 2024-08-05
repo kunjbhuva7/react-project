@@ -22,10 +22,10 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - name: Print Base64 Encoded SSH Key
-      run: echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode | tee kunj_ssh_key
+      run: echo "${{ secrets.EC2_SSH_KEY }}"
     - name: Decode and Save SSH Key
       run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > kunj_ssh_key
+        echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > kunj_ssh_key || { echo "Failed to decode base64"; exit 1; }
         chmod 600 kunj_ssh_key
         echo "SSH key length:"
         wc -c < kunj_ssh_key

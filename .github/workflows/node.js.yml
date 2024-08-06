@@ -1,30 +1,42 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
 name: Node.js CI
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
-
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
+    - name: Decode and Save SSH Key
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > kunj_ssh_key || { echo "Failed to decode base64"; exit 1; }
+        chmod 600 kunj_ssh_key
+        echo "SSH key length:"
+        wc -c < kunj_ssh_key
+        echo "SSH key preview:"
+        head -n 10 kunj_ssh_key
+    - name: Test SSH Connection
+      run: |
+        ssh -o StrictHostKeyChecking=no -i kunj_ssh_key $EC2_USER@$EC2_HOST 'echo "SSH connection successful!"'
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: 3.91.58.141
+        EC2_USER: app
+      run: |
+        scp -o StrictHostKeyChecking=no -i kunj_ssh_key -r . $EC2_USER@$EC2_HOST:/home/kunj/my-nodejs-app
+        ssh -o StrictHostKeyChecking=no -i kunj_ssh_key $EC2_USER@$EC2_HOST 'cd /home/kunj/my-nodejs-app && npm ci && npm run build --if-present'
+        rm kunj_ssh_key
